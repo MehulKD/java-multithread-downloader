@@ -208,7 +208,7 @@ public class DownloadMission {
 
 		setTargetFile(saveDirectory, saveName);
 
-		setProgessFile(mSaveDirectory, mSaveName);
+		setProcessFile(mSaveDirectory, mSaveName);
 	}
 
 	public Boolean setTargetFile(String saveDir, String saveName)
@@ -313,7 +313,7 @@ public class DownloadMission {
 			File targetSaveFile = new File(
 					FileUtils.getSafeDirPath(mission.mSaveDirectory
 							+ File.separator + mission.mSaveName));
-			if (targetSaveFile.exists() == false) {
+			if (!targetSaveFile.exists()) {
 				throw new IOException(
 						"Try to continue download file , but target file does not exist");
 			}
@@ -377,21 +377,29 @@ public class DownloadMission {
 		return connection.getContentLength();
 	}
 
-	private Boolean setProgessFile(String dir, String filename)
+	/**
+	 * temporary file
+	 *
+	 * @param dir
+	 * @param filename
+	 * @return
+	 * @throws IOException
+	 */
+	private Boolean setProcessFile(String dir, String filename)
 			throws IOException {
 		if (dir.lastIndexOf(File.separator) == dir.length() - 1) {
 			dir = dir.substring(0, dir.length() - 1);
 		}
 		File dirFile = new File(dir);
-		if (dirFile.exists() == false) {
-			if (dirFile.mkdirs() == false) {
+		if (!dirFile.exists()) {
+			if (!dirFile.mkdirs()) {
 				throw new RuntimeException("Error to create directory");
 			}
 		}
 		mProgressDir = dirFile.getPath();
 		File file = new File(dirFile.getPath() + File.separator + filename
 				+ ".tmp");
-		if (file.exists() == false) {
+		if (!file.exists()) {
 			file.createNewFile();
 		}
 		mProgressFileName = file.getName();
@@ -507,7 +515,7 @@ public class DownloadMission {
 				throw new IOException(
 						"Try to continue download file , but target file does not exist");
 			}
-			mission.setProgessFile(progressDirectory, progressFileName);
+			mission.setProcessFile(progressDirectory, progressFileName);
 			mission.mMissionID = MISSION_ID_COUNTER++;
 			ArrayList<RecoveryRunnableInfo> recoveryRunnableInfos = mission
 					.getDownloadProgress();
