@@ -1,4 +1,4 @@
-package com.zhan_dui.download;
+package com.zhandui.download;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 public class DownloadThreadPool extends ThreadPoolExecutor {
 
-	private ConcurrentHashMap<Future<?>, Runnable> mRunnable_Monitor_HashMap = new ConcurrentHashMap<Future<?>, Runnable>();
-	private ConcurrentHashMap<Integer, ConcurrentLinkedQueue<Future<?>>> mMissions_Monitor = new ConcurrentHashMap<Integer, ConcurrentLinkedQueue<Future<?>>>();
+	private ConcurrentHashMap<Future<?>, Runnable> mRunnableMonitorHashMap = new ConcurrentHashMap<Future<?>, Runnable>();
+	private ConcurrentHashMap<Integer, ConcurrentLinkedQueue<Future<?>>> mMissionsMonitor = new ConcurrentHashMap<Integer, ConcurrentLinkedQueue<Future<?>>>();
 
 	public DownloadThreadPool(int corePoolSize, int maximumPoolSize,
 			long keepAliveTime, TimeUnit unit,
@@ -51,9 +51,9 @@ public class DownloadThreadPool extends ThreadPoolExecutor {
 			System.out.println(Thread.currentThread().getId()
 					+ " errroed! Retry");
 		}
-		for (Future<?> future : mRunnable_Monitor_HashMap.keySet()) {
+		for (Future<?> future : mRunnableMonitorHashMap.keySet()) {
 			if (future.isDone() == false) {
-				DownloadRunnable runnable = (DownloadRunnable) mRunnable_Monitor_HashMap
+				DownloadRunnable runnable = (DownloadRunnable) mRunnableMonitorHashMap
 						.get(future);
 				DownloadRunnable newRunnable = runnable.split();
 				if (newRunnable != null) {
@@ -67,18 +67,19 @@ public class DownloadThreadPool extends ThreadPoolExecutor {
 	@Override
 	public Future<?> submit(Runnable task) {
 		Future<?> future = super.submit(task);
+
 		if (task instanceof DownloadRunnable) {
 			DownloadRunnable runnable = (DownloadRunnable) task;
 
-			if (mMissions_Monitor.containsKey(runnable.MISSION_ID)) {
-				mMissions_Monitor.get(runnable.MISSION_ID).add(future);
+			if (mMissionsMonitor.containsKey(runnable.MISSION_ID)) {
+				mMissionsMonitor.get(runnable.MISSION_ID).add(future);
 			} else {
 				ConcurrentLinkedQueue<Future<?>> queue = new ConcurrentLinkedQueue<Future<?>>();
 				queue.add(future);
-				mMissions_Monitor.put(runnable.MISSION_ID, queue);
+				mMissionsMonitor.put(runnable.MISSION_ID, queue);
 			}
 
-			mRunnable_Monitor_HashMap.put(future, task);
+			mRunnableMonitorHashMap.put(future, task);
 
 		} else {
 			throw new RuntimeException(
@@ -87,33 +88,33 @@ public class DownloadThreadPool extends ThreadPoolExecutor {
 		return future;
 	}
 
-	public boolean isFinished(int mission_id) {
-		ConcurrentLinkedQueue<Future<?>> futures = mMissions_Monitor
-				.get(mission_id);
+	public boolean isFinished(int missionId) {
+		ConcurrentLinkedQueue<Future<?>> futures = mMissionsMonitor
+				.get(missionId);
 		if (futures == null)
 			return true;
 
 		for (Future<?> future : futures) {
-			if (future.isDone() == false) {
+			if (!future.isDone()) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public void pause(int mission_id) {
-		ConcurrentLinkedQueue<Future<?>> futures = mMissions_Monitor
-				.get(mission_id);
+	public void pause(int missionId) {
+		ConcurrentLinkedQueue<Future<?>> futures = mMissionsMonitor
+				.get(missionId);
 		for (Future<?> future : futures) {
 			future.cancel(true);
 		}
 	}
 
-	public void cancel(int mission_id) {
-		ConcurrentLinkedQueue<Future<?>> futures = mMissions_Monitor
-				.remove(mission_id);
+	public void cancel(int missionId) {
+		ConcurrentLinkedQueue<Future<?>> futures = mMissionsMonitor
+				.remove(missionId);
 		for (Future<?> future : futures) {
-			mRunnable_Monitor_HashMap.remove(future);
+			mRunnableMonitorHashMap.remove(future);
 			future.cancel(true);
 		}
 	}

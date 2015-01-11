@@ -1,5 +1,5 @@
-import com.zhan_dui.download.DownloadManager;
-import com.zhan_dui.download.DownloadMission;
+import com.zhandui.download.DownloadManager;
+import com.zhandui.download.DownloadMission;
 
 import java.io.IOException;
 

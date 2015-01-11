@@ -1,4 +1,4 @@
-package com.zhan_dui.download;
+package com.zhandui.download;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.zhan_dui.download.DownloadMission.MissionMonitor;
+import com.zhandui.download.DownloadMission.MissionMonitor;
 
 @XmlRootElement(name = "Downloading")
 @XmlAccessorType(XmlAccessType.NONE)

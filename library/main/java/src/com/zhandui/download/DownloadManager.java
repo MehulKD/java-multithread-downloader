@@ -1,4 +1,4 @@
-package com.zhan_dui.download;
+package com.zhandui.download;
 
 import java.io.IOException;
 import java.util.Hashtable;
